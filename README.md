@@ -3,7 +3,10 @@
 
 A simple pytho crawler 
 
-:heavy_check_mark: 
+:heavy_check_mark: Respecte la politeness 
+
+:heavy_check_mark: Ne crawle pas un site web qui l’interdit 
+
 
 
 ## Auteur
