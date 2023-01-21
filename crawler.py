@@ -70,7 +70,7 @@ class Crawler:
             return
         for sitemap in all_sitemap :
             parse = urlparse(sitemap)
-            if os.path.splitext(pntarse.path)[-1] == ".xml" and sitemap not in set(self.site_map_to_visit).union(set(self.visited_site_map)):
+            if os.path.splitext(parse.path)[-1] == ".xml" and sitemap not in set(self.site_map_to_visit).union(set(self.visited_site_map)):
                 self.site_map_to_visit.append(sitemap)
         while len(self.visited_urls) + len(self.urls_to_visit)+1<self.n_pages and self.site_map_to_visit:
             sitemap = self.site_map_to_visit.pop(0)
@@ -90,7 +90,7 @@ class Crawler:
         return data
 
     def get_linked_urls_xml(self, xml):
-        soup = BeautifulSoup(xml, 'lxml')
+        soup = BeautifulSoup(xml, 'xml')
         if soup.find('sitemapindex'):
             for link in soup.find_all('loc'):
                 link = regex.findall("<loc>(.*?)</loc>",str(link))
