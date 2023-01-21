@@ -1,5 +1,5 @@
 from urllib.robotparser import RobotFileParser
-from urllib.parse import urljoin, urlparse, urlsplit
+from urllib.parse import urlparse
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 from bs4 import BeautifulSoup
@@ -70,11 +70,13 @@ class Crawler:
             return
         for sitemap in all_sitemap :
             parse = urlparse(sitemap)
-            if os.path.splitext(parse.path)[-1] == ".xml":
+            if os.path.splitext(parse.path)[-1] == ".xml" and sitemap not in set(self.site_map_to_visit).union(set(self.visited_site_map)):
                 self.site_map_to_visit.append(sitemap)
-        while len(self.visited_urls) + len(self.urls_to_visit)<self.n_pages and self.site_map_to_visit:
+        while len(self.visited_urls) + len(self.urls_to_visit)+1<self.n_pages and self.site_map_to_visit:
             sitemap = self.site_map_to_visit.pop(0)
             self.crawl(sitemap,is_html=False)
+            print("SITEAMP",sitemap)
+            print(len(self.urls_to_visit))
             self.visited_site_map.append(sitemap)
 
 
@@ -89,6 +91,17 @@ class Crawler:
 
     def get_linked_urls_xml(self, xml):
         soup = BeautifulSoup(xml, 'lxml')
+        if soup.find('sitemapindex'):
+            for link in soup.find_all('loc'):
+                link = regex.findall("<loc>(.*?)</loc>",str(link))
+                if link :
+                    parse_link = urlparse(link[0])
+                    if os.path.splitext(parse_link.path)[-1] == ".xml":
+                        link = link[0]
+                        if parse_link.path not in [urlparse(item).path for item in list(set(self.site_map_to_visit).union(set(self.visited_site_map)))]:
+                            print("LINK",link)
+                            self.site_map_to_visit.append(link)
+            return
         paths = []
         for link in soup.find_all('loc'):
             link = regex.findall("<loc>(.*?)</loc>",str(link))
@@ -130,6 +143,8 @@ class Crawler:
             if not text:
                 return 
             all_links = self.get_linked_urls_html(text) if is_html else self.get_linked_urls_xml(text)
+            if not all_links:
+                return 
             for url in all_links:
                 if len(self.visited_urls) + len(self.urls_to_visit)+1>=self.n_pages:
                     break
