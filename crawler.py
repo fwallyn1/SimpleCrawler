@@ -70,13 +70,13 @@ class Crawler:
             return
         for sitemap in all_sitemap :
             parse = urlparse(sitemap)
-            if os.path.splitext(parse.path)[-1] == ".xml" and sitemap not in set(self.site_map_to_visit).union(set(self.visited_site_map)):
+            if os.path.splitext(pntarse.path)[-1] == ".xml" and sitemap not in set(self.site_map_to_visit).union(set(self.visited_site_map)):
                 self.site_map_to_visit.append(sitemap)
         while len(self.visited_urls) + len(self.urls_to_visit)+1<self.n_pages and self.site_map_to_visit:
             sitemap = self.site_map_to_visit.pop(0)
             self.crawl(sitemap,is_html=False)
-            print("SITEAMP",sitemap)
-            print(len(self.urls_to_visit))
+            print("SITEMAP",sitemap)
+            print("URL to visit : ", len(self.urls_to_visit))
             self.visited_site_map.append(sitemap)
 
 
