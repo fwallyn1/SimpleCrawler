@@ -75,19 +75,14 @@ class Crawler:
         while len(self.visited_urls) + len(self.urls_to_visit)+1<self.n_pages and self.site_map_to_visit:
             sitemap = self.site_map_to_visit.pop(0)
             self.crawl(sitemap,is_html=False)
-            print("SITEMAP",sitemap)
-            print("SITEMAP TO VISIT", self.site_map_to_visit)
-            print("URL to visit : ", len(self.urls_to_visit))
             self.visited_site_map.append(sitemap)
 
 
     def download_url(self, url:str):
-        print("URL DWONLOAD",url)
         time.sleep(5)
         try:
             x = requests.get(url,timeout=5)
             data = x.text
-            print("XML",data)
         except socket.timeout: 
             data = None
         return data
@@ -144,13 +139,11 @@ class Crawler:
 
     def crawl(self, url, is_html=True):
         try : 
-            print("URL to crawl",url)
             text = self.download_url(url)
             if not text:
                 return 
             all_links = self.get_linked_urls_html(text) if is_html else self.get_linked_urls_xml(text)
             if not all_links:
-                print("No links")
                 return 
             for url in all_links:
                 if len(self.visited_urls) + len(self.urls_to_visit)+1>=self.n_pages:
@@ -167,7 +160,6 @@ class Crawler:
             url = self.urls_to_visit.pop(0)
             self.run_sitemap(url)
             self.crawl(url)
-            print("RUNNING")
             self.visited_urls.append(url)
 
     def find_date(self,url):
