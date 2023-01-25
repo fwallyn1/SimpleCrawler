@@ -1,6 +1,7 @@
-from crawler import Crawler
+from crawler.crawler import Crawler
 from database.database import init_db
 import click
+
 
 @click.command()
 @click.option('--n_pages', default=50)
