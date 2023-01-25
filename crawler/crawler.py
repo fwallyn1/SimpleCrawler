@@ -15,6 +15,7 @@ import requests
 import copy
 import os
 import regex
+from tqdm import tqdm
 
 class TimoutRobotFileParser(RobotFileParser):
     def __init__(self, url='', timeout=60):
@@ -44,7 +45,7 @@ class Crawler:
         self.n_pages = n_pages
         self.site_map_to_visit = []
         self.visited_site_map = []
-
+        self.pbar = tqdm(total = self.n_pages)
     def get_site_map_urls(self,url):
         parse = urlparse(url)
         base_url = f"{parse.scheme}://{parse.netloc}"
@@ -88,10 +89,8 @@ class Crawler:
         return data
 
     def get_linked_urls_xml(self, xml):
-        print(xml)
         soup = BeautifulSoup(xml, 'xml')
         if soup.find('sitemapindex'):
-            print("INDEX")
             for link in soup.find_all('loc'):
                 link = regex.findall("<loc>(.*?)</loc>",str(link))
                 if link :
@@ -99,8 +98,8 @@ class Crawler:
                     if os.path.splitext(parse_link.path)[-1] == ".xml":
                         link = link[0]
                         if parse_link.path not in [urlparse(item).path for item in list(set(self.site_map_to_visit).union(set(self.visited_site_map)))]:
-                            print("LINK",link)
                             self.site_map_to_visit.append(link)
+                            
             return
         paths = []
         for link in soup.find_all('loc'):
@@ -152,15 +151,19 @@ class Crawler:
                     existing_url = list(set(self.urls_to_visit).union(set(self.visited_urls)).union(set(self.site_map_to_visit)).union(set(self.visited_site_map)))
                     if url not in existing_url:
                         self.add_url_to_visit(url)
+                        self.pbar.update(1)
         except socket.timeout:
             pass
 
     def run(self):
+        
         while len(self.visited_urls) + len(self.urls_to_visit)<self.n_pages and self.urls_to_visit:
             url = self.urls_to_visit.pop(0)
             self.run_sitemap(url)
             self.crawl(url)
             self.visited_urls.append(url)
+            self.pbar.update(1)
+        self.pbar.close()
 
     def find_date(self,url):
         try :
